@@ -1,0 +1,32 @@
+import {buildMotorcycle} from './motorcycle-model.js';
+import {mergeGeometries} from './vendor/utils/BufferGeometryUtils.js';
+import * as T from './vendor/three.module.js';
+import {buildCar} from './car-model.js';
+import {vehicleById} from './fleet-data.js';
+import {groundHeight} from './city-data.js';
+const cube=new T.BoxGeometry(1,1,1),up=new T.Vector3(0,1,0);
+export function makeVehicle(type,{lowDetail=false}={}){
+ const d=vehicleById(type),group=new T.Group(),wheels=[],front=[],doors=[],lights=[];
+ const mat=(c,m=.1,r=.5)=>new T.MeshStandardMaterial({color:c,metalness:m,roughness:r});
+ const paint=new T.MeshPhysicalMaterial({color:d.color,metalness:.58,roughness:.26,clearcoat:1}),dark=mat('#1d2931',.5,.38),rubber=mat('#161b21',0,.94),metal=mat('#9aaab2',.85,.28),glass=new T.MeshPhysicalMaterial({color:'#376172',metalness:.1,roughness:.15,transparent:true,opacity:.44,depthWrite:false}),trim=mat('#24383f',.5,.3);
+ const glow=c=>new T.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:.8});const led=glow(d.accent),red=glow('#eb4b49');
+ const mesh=(geo,mat,pos,parent=group)=>{const m=new T.Mesh(geo,mat);m.position.set(...pos);parent.add(m);return m};
+ const box=(pos,sc,mat,parent=group)=>{const m=mesh(cube,mat,pos,parent);m.scale.set(...sc);return m};
+ const ell=(pos,sc,mat,parent=group)=>{const m=mesh(new T.SphereGeometry(1,lowDetail?10:20,lowDetail?7:12),mat,pos,parent);m.scale.set(...sc);return m};
+ const rod=(a,b,r,mat,parent=group)=>{const v=new T.Vector3(...b).sub(new T.Vector3(...a));const m=mesh(new T.CylinderGeometry(r,r,v.length(),lowDetail?7:12),mat,a.map((v,i)=>(v+b[i])/2),parent);m.quaternion.setFromUnitVectors(up,v.normalize());return m};
+ const loft=(rings,mat)=>{const pts=[],idx=[],n=lowDetail?16:28;for(const [z,y,rx,ry]of rings)for(let j=0;j<n;j++){const a=Math.PI/4+j/n*Math.PI*2;pts.push(Math.cos(a)*rx,y+Math.sin(a)*ry,z)}for(let i=0;i<rings.length-1;i++)for(let j=0;j<n;j++){const a=i*n+j,b=i*n+(j+1)%n,c=(i+1)*n+j,e=(i+1)*n+(j+1)%n;idx.push(a,c,b,b,c,e)}for(let j=1;j<n-1;j++){idx.push(0,j+1,j);const q=(rings.length-1)*n;idx.push(q,q+j,q+j+1)}const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pts,3));g.setIndex(idx);g.computeVertexNormals();return mesh(g,mat,[0,0,0]);};
+ function wheel(x,y,z,r,w,steer=false,hubless=false){const pivot=new T.Group();pivot.position.set(x,y,z);group.add(pivot);const spin=new T.Group();pivot.add(spin);wheels.push(spin);if(steer)front.push(pivot);const tyre=mesh(new T.TorusGeometry(r*.78,r*.22,lowDetail?6:10,lowDetail?16:32),rubber,[0,0,0],spin);tyre.rotation.y=Math.PI/2;tyre.scale.z=w/(r*.44);
+  for(const side of[-1,1]){const rim=mesh(new T.TorusGeometry(r*.66,.022,6,lowDetail?16:32),metal,[side*w*.42,0,0],spin);rim.rotation.y=Math.PI/2;
+   if(hubless){const ring=mesh(new T.TorusGeometry(r*.54,.025,6,24),led,[side*w*.48,0,0],spin);ring.rotation.y=Math.PI/2;}
+   else for(let j=0;j<6;j++){const a=j/6*Math.PI*2;rod([side*w*.43,0,0],[side*w*.43,Math.sin(a)*r*.63,Math.cos(a)*r*.63],.018,metal,spin);}
+  }return pivot;
+ }
+ if(d.kind==='bike'){buildMotorcycle({d,group,wheels,front,lowDetail}); }else{buildCar({d,group,lowDetail,doors,wheels,front,lights});}
+
+ if(lowDetail){const shadow=new T.Mesh(new T.CircleGeometry(1,16),new T.MeshBasicMaterial({color:'#142228',transparent:true,opacity:.22,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.scale.set(d.width*.7,d.length*.48,1);shadow.position.y=.012;shadow.renderOrder=-10;shadow.userData.groundShadow=true;group.add(shadow);}
+ const damagePuffs=[];for(let i=0;i<3;i++){const smoke=ell([0,1,-d.length*.27],[.15,.16,.15],new T.MeshBasicMaterial({color:'#68696a',transparent:true,opacity:0,depthWrite:false}));smoke.userData.smoke=true;damagePuffs.push(smoke);}
+ if(!lowDetail){const batches=new Map();group.updateMatrixWorld(true);for(const m of [...group.children]){if(!m.isMesh||m.userData.smoke||m.userData.groundShadow||lights.includes(m)||Array.isArray(m.material))continue;let g=m.geometry.clone().applyMatrix4(m.matrix);if(g.index)g=g.toNonIndexed();if(!m.material.map)g.deleteAttribute('uv');const key=m.material.uuid;if(!batches.has(key))batches.set(key,{material:m.material,parts:[]});batches.get(key).parts.push(g);group.remove(m);}for(const {material,parts}of batches.values()){const g=mergeGeometries(parts,false);if(g){g.setIndex(Array.from({length:g.attributes.position.count},(_,i)=>i));group.add(new T.Mesh(g,material));}for(const part of parts)part.dispose();}}
+ const detailed=[...group.children],proxy=new T.Group();group.add(proxy);if(d.kind==='car'){ell([0,.64,0],[d.width*.51,.37,d.length*.5],paint,proxy);ell([0,d.height*.73,.2],[d.width*.40,d.height*.30,d.length*.27],dark,proxy);for(const side of[-1,1])for(const z of[-d.wheelbase/2,d.wheelbase/2])ell([side*d.width*.47,.33,z],[.13,.33,.33],rubber,proxy);}else{box([0,.64,0],[.45,.48,1.55],paint,proxy);box([0,.29,0],[.21,.44,2.1],rubber,proxy);}proxy.visible=false;
+ group.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true;m.userData.dynamic=true}});
+ return{group,wheels,front,doors,lights,def:d,lod(distance){const far=distance>(d.kind==='car'?(lowDetail?55:190):(lowDetail?45:90));proxy.visible=far;for(const m of detailed)m.visible=!far;},update(v,time=0){const damage=v.damage||0;for(let i=0;i<damagePuffs.length;i++){const puff=damagePuffs[i],age=(time*.65+i/3)%1;puff.visible=!proxy.visible&&damage>.55;puff.position.y=.9+age*1.5;puff.position.x=Math.sin(time+i)*.12;puff.scale.setScalar(.12+age*.4);puff.material.opacity=(1-age)*Math.min(.40,damage*.42);}if(group.userData.damage!==damage){group.userData.damage=damage;group.traverse(m=>{if(m.isMesh&&m.material?.isMeshPhysicalMaterial&&!m.material.transparent){m.userData.baseColor??=m.material.color.clone();m.material.color.copy(m.userData.baseColor).multiplyScalar(1-damage*.28);}});}group.position.set(v.x,0,v.z);group.rotation.set(0,-v.heading,d.kind==='bike'?-(v.steering||0)*Math.min(.43,Math.abs(v.speed||0)*.015):-(v.steering||0)*Math.min(.027,Math.abs(v.speed||0)*.001));group.position.y=groundHeight(v.x,v.z)+Math.sin(time*12)*(Math.min(Math.abs(v.speed||0),30)/30)*.009;for(const wheel of wheels)wheel.rotation.x=-(v.distance||0)/.33;for(const p of front)p.rotation.y=-(v.steering||0)*.32;for(const door of doors)door.group.rotation.y=door.side<0?(v.door||0)*1.08:0;for(let i=0;i<lights.length;i++)lights[i].visible=!proxy.visible&&!!v.siren&&Math.floor(time*9+i)%2===0;}};
+}
