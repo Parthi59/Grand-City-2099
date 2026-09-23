@@ -8,7 +8,7 @@ Grand City 2099 is designed as a living city rather than a static scene. Vehicle
 
 ## Play Grand City 2099
 
-**[▶ PLAY GRAND CITY OPENWORLD](https://grand-city-openworld.vercel.app)**
+**[ GRAND CITY OPENWORLD](https://grand-city-openworld.vercel.app)**
 
 Launch the live build directly in your browser. For audio, enter the game first and enable sound when prompted by the browser.
 
