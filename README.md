@@ -6,6 +6,12 @@ Grand City 2099 is designed as a living city rather than a static scene. Vehicle
 
 > Current focus: expanding city life, vehicle variety, NPC realism, driving feel, sound design and open-world interaction.
 
+## Play Grand City 2099
+
+**[▶ PLAY GRAND CITY 2099](https://grand-city-openworld.vercel.app)**
+
+Launch the live build directly in your browser. For audio, enter the game first and enable sound when prompted by the browser.
+
 ## Gameplay Preview
 
 ### 1. A New Day. Your Rules.
