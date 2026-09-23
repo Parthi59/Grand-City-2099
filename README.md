@@ -6,6 +6,38 @@ Grand City 2099 is designed as a living city rather than a static scene. Vehicle
 
 > Current focus: expanding city life, vehicle variety, NPC realism, driving feel, sound design and open-world interaction.
 
+## Gameplay Preview
+
+### 1. A New Day. Your Rules.
+![Grand City 2099 Hero Screenshot](docs/screenshots/screen-1-home.png)
+
+A first look at Grand City 2099’s open-world presentation, showing the city atmosphere, Motorworks hub, active pedestrians, vehicles and the game’s main entry experience.
+
+### 2. Free Roam Driving
+![Grand City 2099 Driving Screenshot](docs/screenshots/screen-2-driving.png)
+
+A live in-game driving view showing Grand City 2099’s free roam experience, HUD, minimap, vehicle controls, speed readout and open city-road traversal.
+
+### 3. Motorworks & On-Foot Gameplay
+![Grand City 2099 Motorworks Screenshot](docs/screenshots/screen-3-motorworks.png)
+
+A closer look at Grand City 2099’s on-foot gameplay around Motorworks, showing the player character, multiple bike options, garage interaction, minimap, weapon selection and open-world navigation.
+
+### 4. City Life & Pedestrians
+![Grand City 2099 City Life Screenshot](docs/screenshots/screen-4-city-life.png)
+
+Grand City 2099 is designed to feel active beyond the player. Pedestrians, roadside movement, vehicle traffic and open streets help turn the environment into a living city rather than a static map.
+
+### 5. Combat & Open-World Interaction
+![Grand City 2099 Combat Screenshot](docs/screenshots/screen-5-combat.png)
+
+Combat is integrated directly into the open world. The player can switch weapons, aim, fire, reload, interact with nearby vehicles and continue moving through active traffic while the city responds around them.
+
+### 6. Contracts & Missions
+![Grand City 2099 Contracts Screenshot](docs/screenshots/screen-6-contracts.png)
+
+The Grand City Network gives players structured objectives alongside free roam. Contracts include courier runs, timed street routes and pursuit-based missions, each with different rewards and gameplay goals.
+
 ## Game overview
 
 The project combines several systems that would normally exist separately — city rendering, vehicle handling, character movement, combat, traffic, audio, garages and missions — into one playable experience.
@@ -96,6 +128,7 @@ npm test
 Grand-City-2099/
 ├── build/              Production-ready game build and bundled assets
 ├── dist/               Distribution output and runtime assets
+├── docs/screenshots/   Gameplay preview images used in this README
 ├── scripts/            Project utility / asset preparation scripts
 ├── tests/              Automated gameplay and rendering checks
 ├── ASSETS.md           Asset provenance, licenses and attribution notes
@@ -201,4 +234,3 @@ The project evolved through repeated design, implementation, testing and gamepla
 **YM Parthish**
 
 Vision, direction and gameplay concept by YM Parthish.
-
