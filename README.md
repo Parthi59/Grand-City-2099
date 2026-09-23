@@ -200,4 +200,5 @@ The project evolved through repeated design, implementation, testing and gamepla
 
 **YM Parthish**
 
-Project concept, direction, gameplay vision and iteration by YM Parthish.
+Vision, direction and gameplay concept by YM Parthish.
+
